@@ -3,9 +3,7 @@ import ProductList from "@/components/ProductList";
 import CategoryTabs from "@/components/CategoryTabs";
 
 async function getProducts(): Promise<Product[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-
-  const res = await fetch(`${baseUrl}/api/products`, {
+  const res = await fetch("/api/products", {
     next: { revalidate: 60 },
   });
 
