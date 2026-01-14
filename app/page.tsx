@@ -1,25 +1,14 @@
 import { Product } from "@/types/product";
 import ProductList from "@/components/ProductList";
 import CategoryTabs from "@/components/CategoryTabs";
-
-async function getProducts(): Promise<Product[]> {
-  const res = await fetch("/api/products", {
-    next: { revalidate: 60 },
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
-  }
-
-  return res.json();
-}
+import { getProducts } from "@/lib/products";
 
 export default async function HomePage({
   searchParams,
 }: {
   searchParams: { category?: string };
 }) {
-  const products = await getProducts();
+  const products: Product[] = await getProducts();
   const category = searchParams.category ?? "all";
 
   // 🔹 FILTER PRODUK BERDASARKAN KATEGORI
