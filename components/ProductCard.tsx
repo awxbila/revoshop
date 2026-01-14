@@ -1,42 +1,28 @@
-import { ProductResponseInterface } from "@/app/types/product";
+"use client";
+
 import Link from "next/link";
+import { Product } from "@/types/product";
+import { useCart } from "@/context/CartContext";
 
-interface ProductCardProps {
-  product: ProductResponseInterface;
-  onAdd: () => void;
-}
+export default function ProductCard({ product }: { product: Product }) {
+  const { addToCart } = useCart();
 
-const ProductCard = ({ product, onAdd }: ProductCardProps) => {
   return (
-    <div className="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-      <img
-        src={product.images[0]}
-        alt={product.title}
-        className="mb-4 w-full h-40 object-cover rounded-md"
-      />
-      <h2 className="text-lg font-semibold">{product.title}</h2>
-      <p className="text-gray-600 mb-2">Rp {product.price.toLocaleString()}</p>
-      <p className="text-sm text-gray-500 line-clamp-2">
-        {product.description}
-      </p>
+    <div className="product-card">
+      <Link href={`/products/${product.id}`} className="product-link">
+        <div className="product-image">
+          <img src={product.image} alt={product.title} />
+        </div>
 
-      <div className="mt-3 flex gap-2">
-        <button
-          className="flex-1 rounded-md bg-black px-4 py-2 text-white hover:bg-gray-800 transition-colors"
-          onClick={onAdd}
-        >
-          Add To Cart
-        </button>
+        <h1 className="product-title">{product.title}</h1>
+      </Link>
 
-        <Link
-          href={`/product/${product.id}`}
-          className="flex-1 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600 transition-colors text-center"
-        >
-          Edit
-        </Link>
-      </div>
+      <h2 className="product-category">{product.category}</h2>
+      <p className="product-price">Rp {product.price}</p>
+
+      <button className="add-btn" onClick={() => addToCart(product)}>
+        +
+      </button>
     </div>
   );
-};
-
-export default ProductCard;
+}

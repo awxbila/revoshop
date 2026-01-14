@@ -1,56 +1,37 @@
-"use client";
-
-import Header from "@/components/Header";
+import { Product } from "@/types/product";
 import ProductList from "@/components/ProductList";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { ProductResponseInterface } from "@/app/types/product";
-import { getProducts } from "./services/product.api";
+import CategoryTabs from "@/components/CategoryTabs";
 
-export default function Home() {
-  const [cartCount, setCartCount] = useState<number>(0);
-  const [products, setProducts] = useState<ProductResponseInterface[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+async function getProducts(): Promise<Product[]> {
+  const res = await fetch("http://localhost:3000/api/products", {
+    next: { revalidate: 60 }, // ISR
+  });
 
-  const handleAddToCart = () => {
-    setCartCount((prev) => prev + 1);
-  };
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
 
-  const fetchProducts = async () => {
-    try {
-      const data = await getProducts(1, 10);
-      setProducts(data);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  return res.json();
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { category?: string };
+}) {
+  const products = await getProducts();
+  const category = searchParams.category ?? "all";
+
+  // 🔹 FILTER PRODUK BERDASARKAN KATEGORI
+  const filteredProducts =
+    category !== "all"
+      ? products.filter((p) => p.category === category)
+      : products;
 
   return (
-    <main className="container mx-auto px-4 py-6">
-      <Header cartCount={cartCount} />
-
-      <div className="flex justify-end mb-4">
-        <Link
-          href="/product/create"
-          className="rounded-md bg-black px-4 py-2 text-white hover:bg-black/80 transition-colors"
-        >
-          + Create Product
-        </Link>
-      </div>
-
-      {loading ? (
-        <p className="text-center">Loading products...</p>
-      ) : error ? (
-        <p className="text-center text-red-500">{error}</p>
-      ) : (
-        <ProductList products={products} onAdd={handleAddToCart} />
-      )}
+    <main className="container">
+      <CategoryTabs />
+      <ProductList products={filteredProducts} />
     </main>
   );
 }
